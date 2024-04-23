@@ -27,6 +27,8 @@ AFRAME.registerComponent('simple-navmesh-constraint', {
 
     this.el.sceneEl.addEventListener('child-attached', this.updateNavmeshEntities);
     this.el.sceneEl.addEventListener('child-detached', this.updateNavmeshEntities);
+
+    this.needsUpdate = true;
   },
 
   remove: function () {
@@ -37,7 +39,7 @@ AFRAME.registerComponent('simple-navmesh-constraint', {
   updateNavmeshEntities: function (evt) {
     // Don't bother updating if the entity is not relevant to us
     if (evt.detail.el.matches(this.data.navmesh) || evt.detail.el.matches(this.data.exclude)) {
-      this.update();
+      this.needsUpdate = true;
     }
   },
 
@@ -52,6 +54,8 @@ AFRAME.registerComponent('simple-navmesh-constraint', {
       this.objects = els.map(el => el.object3D).concat(this.excludes.map(el => el.object3D));
     }
     this.xzOrigin = this.data.xzOrigin ? this.el.querySelector(this.data.xzOrigin) : this.el;
+
+    this.needsUpdate = false;
   },
 
   tick: (function () {
@@ -77,6 +81,9 @@ AFRAME.registerComponent('simple-navmesh-constraint', {
     
     return function tick(time, delta) {
       if (this.data.enabled === false) return;
+      if (this.needsUpdate) {
+	this.update();
+      }
       if (this.lastPosition === null) {
         firstTry = true;
         this.lastPosition = new THREE.Vector3();
