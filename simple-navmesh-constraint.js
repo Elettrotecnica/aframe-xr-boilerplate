@@ -36,7 +36,7 @@ AFRAME.registerComponent('simple-navmesh-constraint', {
 
   updateNavmeshEntities: function (evt) {
     // Don't bother updating if the entity is not relevant to us
-    if (evt.detail.el.matches(`${this.data.navmesh}, ${this.data.exclude}`)) {
+    if (evt.detail.el.matches(this.data.navmesh) || evt.detail.el.matches(this.data.exclude)) {
       this.update();
     }
   },
