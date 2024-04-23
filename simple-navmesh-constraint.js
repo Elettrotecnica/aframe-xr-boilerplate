@@ -24,14 +24,12 @@ AFRAME.registerComponent('simple-navmesh-constraint', {
 
   init: function () {
     this.updateNavmeshEntities = this.updateNavmeshEntities.bind(this);
-  },
 
-  play: function () {
     this.el.sceneEl.addEventListener('child-attached', this.updateNavmeshEntities);
     this.el.sceneEl.addEventListener('child-detached', this.updateNavmeshEntities);
   },
 
-  pause: function () {
+  remove: function () {
     this.el.sceneEl.removeEventListener('child-attached', this.updateNavmeshEntities);
     this.el.sceneEl.removeEventListener('child-detached', this.updateNavmeshEntities);
   },
