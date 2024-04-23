@@ -27,8 +27,6 @@ AFRAME.registerComponent('simple-navmesh-constraint', {
 
     this.el.sceneEl.addEventListener('child-attached', this.updateNavmeshEntities);
     this.el.sceneEl.addEventListener('child-detached', this.updateNavmeshEntities);
-
-    this.needsUpdate = true;
   },
 
   remove: function () {
