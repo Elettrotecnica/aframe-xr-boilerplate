@@ -23,29 +23,28 @@ AFRAME.registerComponent('simple-navmesh-constraint', {
   },
 
   init: function () {
-    this.updateNavmeshEntities = this.updateNavmeshEntities.bind(this);
+    this.onSceneUpdated = this.onSceneUpdated.bind(this);
 
-    this.el.sceneEl.addEventListener('child-attached', this.updateNavmeshEntities);
-    this.el.sceneEl.addEventListener('child-detached', this.updateNavmeshEntities);
+    this.el.sceneEl.addEventListener('child-attached', this.onSceneUpdated);
+    this.el.sceneEl.addEventListener('child-detached', this.onSceneUpdated);
   },
 
   remove: function () {
-    this.el.sceneEl.removeEventListener('child-attached', this.updateNavmeshEntities);
-    this.el.sceneEl.removeEventListener('child-detached', this.updateNavmeshEntities);
+    this.el.sceneEl.removeEventListener('child-attached', this.onSceneUpdated);
+    this.el.sceneEl.removeEventListener('child-detached', this.onSceneUpdated);
   },
 
-  updateNavmeshEntities: function (evt) {
+  onSceneUpdated: function (evt) {
     // We already have an update on the way
-    if (this.needsUpdate) { return; }
+    if (this.entitiesChanged) { return; }
 
     // Don't bother updating if the entity is not relevant to us
     if (evt.detail.el.matches(this.data.navmesh) || evt.detail.el.matches(this.data.exclude)) {
-      this.needsUpdate = true;
+      this.entitiesChanged = true;
     }
   },
 
-  update: function () {
-    this.lastPosition = null;
+  updateNavmeshEntities: function () {
     this.excludes = this.data.exclude ? Array.from(document.querySelectorAll(this.data.exclude)):[];
     const els = Array.from(document.querySelectorAll(this.data.navmesh));
     if (els === null) {
@@ -54,9 +53,15 @@ AFRAME.registerComponent('simple-navmesh-constraint', {
     } else {
       this.objects = els.map(el => el.object3D).concat(this.excludes.map(el => el.object3D));
     }
+
+    this.entitiesChanged = false;
+  },
+
+  update: function () {
+    this.lastPosition = null;
     this.xzOrigin = this.data.xzOrigin ? this.el.querySelector(this.data.xzOrigin) : this.el;
 
-    this.needsUpdate = false;
+    this.updateNavmeshEntities();
   },
 
   tick: (function () {
@@ -82,8 +87,8 @@ AFRAME.registerComponent('simple-navmesh-constraint', {
     
     return function tick(time, delta) {
       if (this.data.enabled === false) return;
-      if (this.needsUpdate) {
-	this.update();
+      if (this.entitiesChanged) {
+	this.updateNavmeshEntities();
       }
       if (this.lastPosition === null) {
         firstTry = true;
